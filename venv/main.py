@@ -1,7 +1,9 @@
-import generator
+from data import Data
 
-dataSize = 100;
 
-generator.generate(dataSize)
-generator.humm()
-generator.printData()
+data = Data(1000, 0.3)
+
+data.generate()
+data.print()
+data.humm()
+data.print()
