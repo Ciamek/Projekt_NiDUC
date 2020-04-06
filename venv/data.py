@@ -60,20 +60,20 @@ class Data:
         zeros = 0
         ones = 0
 
-        for bit in self.bits:
+        for i in range(0, self.dataSize, 3):
             zeros = 0
             ones = 0
 
-            for i in range(0, 3):
-                if bit == 0:
+            for j in range(i, i+3):
+                if self.bits[j] == 0:
                     zeros += 1
                 else:
                     ones += 1
 
             if zeros > ones:
-                decoded_bits.append(1)
-            else:
                 decoded_bits.append(0)
+            else:
+                decoded_bits.append(1)
 
         self.bits = decoded_bits
         self.dataSize /= 3
