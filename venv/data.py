@@ -7,11 +7,10 @@ class Data:
     random.seed()
     def __init__(self, dataSize, hummPercentage, packetSize, n):
         self.bits = []
-
         self.dataSize = dataSize
         self.hummPercentage = hummPercentage
         self.packetSize = packetSize
-        self.packet = self.Packet(packetSize, hummPercentage, n)
+        self.packet = self.Packet( hummPercentage, n)
         self.generate()
 
     def generate(self):
@@ -27,6 +26,7 @@ class Data:
     def transmit(self):
         transmitedData = []
         counter = 0
+
         for i in range(0, self.dataSize, self.packetSize):
             self.packet.bits = self.bits [i:i+self.packetSize]
             #dopisuje 0 jeśli brakuje bitów do pakitu
@@ -50,10 +50,9 @@ class Data:
 
     class Packet:
         random.seed()
-        def __init__(self, packetSize, hummPercentage, n):
+        def __init__(self, hummPercentage, n):
             self.bits = []
             self.hummPercentage = hummPercentage
-            self.packetSize = packetSize
             self.n = n
 
         def humm(self):
@@ -65,15 +64,9 @@ class Data:
             counter = 0
 
             #zaszumianie
-            for i in range(0, int(self.packetSize)):
+            for i in range(0, int(self.bits.__len__())):
                 if(random.randrange(0,100)<=self.hummPercentage):
                     self.bits[i] = -self.bits[i] + 1
-
-            #obliczanie porcentu błędów
-            for i in range(0, self.bits.__len__()):
-                if (tempBits[i] != self.bits[i]):
-                    counter += 1
-            return counter/self.n
 
         def print(self):
             # printuje dane
@@ -86,7 +79,7 @@ class Data:
                 for i in range(0, self.n):
                     encoded_bits.append(bit)
             self.bits = encoded_bits
-            self.packetSize *= self.n
+
 
         def decode(self):
             decoded_bits = []
@@ -107,9 +100,8 @@ class Data:
                     decoded_bits.append(0)
                 else:
                     decoded_bits.append(1)
-
             self.bits = decoded_bits
-            self.packetSize /= self.n
+
 
 
 #zaszumianie
