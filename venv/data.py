@@ -1,108 +1,65 @@
 import random
-import copy
-
+from packet import Packet
 
 class Data:
-                 #lista z danymi
+
     random.seed()
-    def __init__(self, dataSize, hummPercentage, packetSize, n):
+    def __init__(self, size, hum_percentage):
         self.bits = []
-        self.dataSize = dataSize
-        self.hummPercentage = hummPercentage
-        self.packetSize = packetSize
-        self.packet = self.Packet( hummPercentage, n)
+        self.size = size
+        self.humPercentage = hum_percentage
         self.generate()
 
     def generate(self):
-        #generuje tablicę danych
-        for i in range(0, self.dataSize):
+        for i in range(0, self.size):
             self.bits.append(random.getrandbits(1))
 
     def print(self):
-        # printuje dane
         print(self.bits)
 
     #funkcja symulująca transmisję, zwraca procentową liczbę błędów
-    def transmit(self):
-        transmitedData = []
-        counter = 0
+    def transmit(self, packet_size, encoding):
+        data_received = []
+        packet = Packet()
 
-        for i in range(0, self.dataSize, self.packetSize):
-            self.packet.bits = self.bits [i:i+self.packetSize]
-            #dopisuje 0 jeśli brakuje bitów do pakitu
-            while (self.packet.bits.__len__()<self.packetSize):
-                self.packet.bits.append(0)
+        for i in range(0, self.size, packet_size):
+            packet.bits = self.bits [i:i+self.size]
 
-            self.packet.encode()
-            self.packet.humm()
-            self.packet.decode()
+            #dopisuje 0 jeśli brakuje bitów do pakietu
+            while len(packet.bits) < self.size:
+                packet.bits.append(0)
 
-            #dołącza pakiet do listy bitów
-            for j in range (0, self.packetSize):
-                transmitedData.append(self.packet.bits[j])
+            # kodowanie
+            if encoding == "fec":
+                packet.fec_encode(3)
+            elif encoding == "hamming":
+                packet.hamming_encode()
+            #
+
+            packet.hum(self.humPercentage)
+
+            # dekodowanie
+            if encoding == "fec":
+                packet.fec_decode(3)
+            elif encoding == "hamming":
+                packet.hamming_decode()
+            #
+
+            #dołącza pakiet do bitów odebranych
+            for j in range (0, packet_size):
+                data_received.append(packet.bits[j])
+
         #oblicza ilość błędów
-        for i in range (0, self.bits.__len__()):
-            if(transmitedData[i] != self.bits[i]):
-                counter += 1
+        errors = 0
+        for i in range (0, len(self.bits) - 1):
+            if data_received[i] != self.bits[i]:
+                errors += 1
+        #
 
-        return counter/self.bits.__len__()
-
-
-    class Packet:
-        random.seed()
-        def __init__(self, hummPercentage, n):
-            self.bits = []
-            self.hummPercentage = hummPercentage
-            self.n = n
-
-        def humm(self):
-            #zaszumia dane
-            #TODO wybieranko zaszumiania
-
-            #kopiuje listę do porównania
-            tempBits = self.bits
-            counter = 0
-
-            #zaszumianie
-            for i in range(0, int(self.bits.__len__())):
-                if(random.randrange(0,100)<=self.hummPercentage):
-                    self.bits[i] = -self.bits[i] + 1
-
-        def print(self):
-            # printuje dane
-            print(self.bits)
-
-        #kodowanie za pomocą FEC
-        def encode(self):
-            encoded_bits = []
-            for bit in self.bits:
-                for i in range(0, self.n):
-                    encoded_bits.append(bit)
-            self.bits = encoded_bits
-
-
-        def decode(self):
-            decoded_bits = []
-            zeros = 0
-            ones = 0
-
-            for i in range(0, self.bits.__len__(), self.n):
-                zeros = 0
-                ones = 0
-
-                for j in range(i, i+self.n):
-                    if self.bits[j] == 0:
-                        zeros += 1
-                    else:
-                        ones += 1
-
-                if zeros > ones:
-                    decoded_bits.append(0)
-                else:
-                    decoded_bits.append(1)
-            self.bits = decoded_bits
-
-
+        if len(self.bits) == 0:
+            return 0;
+        else:
+            return errors/len(self.bits)
 
 #zaszumianie
 #drugi algorytm
