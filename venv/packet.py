@@ -1,4 +1,5 @@
 import random
+import math
 
 class Packet:
     random.seed()
@@ -7,7 +8,6 @@ class Packet:
         self.bits = []
 
     def hum(self, hum_percentage):
-        # zaszumia dane
         # TODO wybieranko zaszumiania
 
         # zaszumianie
@@ -18,8 +18,8 @@ class Packet:
     def print(self):
         print(self.bits)
 
-    # kodowanie za pomocą FEC
-    # każdy bit zapisujemy n razy
+    # Kodowanie za pomocą FEC.
+    # Każdy bit zapisujemy n razy.
     def fec_encode(self, n):
         encoded_bits = []
         for bit in self.bits:
@@ -45,12 +45,34 @@ class Packet:
 
         self.bits = decoded_bits
 
-    # zwraca liczbę bitów parzystości do wstawienia
-    # def parity_bits(length):
-    #    i = 1
-    #    while i < length:
-    #        i *= 2
 
-    # def hamming_encode(self):
-    #    length = len(self.bits)
-    #    pos = 0
+    #@staticmethod
+    #def get_2s_powers_range(n):
+    #    return [1 << i for i in range(int(math.log2(n+1)))]
+
+    @staticmethod
+    def get_2s_powers_range(n):
+        powers = []
+        i = 1
+        while i < n:
+            powers.append(i)
+            n += 1
+            i = i << 1
+        return powers
+
+    def hamming_encode(self):
+
+        # [1, 2, 4, 8, ... < n]
+        powers = self.get_2s_powers_range(len(self.bits))
+
+        # Na pozycjach będących kolejnymi potęgami dwójki wstawiamy bity parzystosci.
+        for p in powers:
+            self.bits.insert(p-1, 0)
+
+        # Obliczamy bity parzystosci.
+        for p in powers:
+            sum = 0
+            for i in range(p-1, len(self.bits), 2*p):
+                # Obliczamy sumę p kolejnych bitów.
+                sum += self.bits[i : i + p].count(1)
+            self.bits[p-1] = 1 if sum % 2 else 0
