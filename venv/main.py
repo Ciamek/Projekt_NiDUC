@@ -1,11 +1,9 @@
 from data import Data
 import copy
 
-data = Data(10, 0.1)
-data.generate()
+data = Data(10000, 20, 10, 10)
 data.print()
-data.encode()
-data.print()
-print(data.humm())
-data.decode()
-data.print()
+print(data.transmit())
+
+
+

@@ -1,4 +1,0 @@
-
-def compare():
-    c;
-
