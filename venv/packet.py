@@ -60,8 +60,15 @@ class Packet:
             i = i << 1
         return powers
 
-    def hamming_encode(self):
+    # Zwraca sumę bitów odpowiadających danej potędze dwójki p w kodzie Hamminga.
+    def get_p_bits_sum(self, p):
+        sum = 0
+        for i in range(p - 1, len(self.bits), 2 * p):
+            # Obliczamy sumę p kolejnych bitów.
+            sum += self.bits[i: i + p].count(1)
+        return sum
 
+    def hamming_encode(self):
         # [1, 2, 4, 8, ... < n]
         powers = self.get_2s_powers_range(len(self.bits))
 
@@ -71,8 +78,19 @@ class Packet:
 
         # Obliczamy bity parzystosci.
         for p in powers:
-            sum = 0
-            for i in range(p-1, len(self.bits), 2*p):
-                # Obliczamy sumę p kolejnych bitów.
-                sum += self.bits[i : i + p].count(1)
-            self.bits[p-1] = 1 if sum % 2 else 0
+            self.bits[p-1] = 1 if self.get_p_bits_sum(p) % 2 else 0
+
+    def hamming_decode(self):
+        powers = self.get_2s_powers_range(len(self.bits))
+        error_position = 0
+
+        for p in powers:
+            if self.get_p_bits_sum(p) % 2 != 0:
+                error_position += p
+
+        if error_position > 0:
+            if error_position < len(self.bits):
+                self.bits[error_position - 1] = 1 - self.bits[error_position - 1]
+            return False
+
+        return True
