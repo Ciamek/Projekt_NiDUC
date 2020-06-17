@@ -9,3 +9,4 @@ print(data.transmit(5, "fec"))
 
 data.print()
 print(data.transmit(5, "hamming"))
+data.print()
